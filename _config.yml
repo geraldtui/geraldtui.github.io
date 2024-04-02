@@ -16,7 +16,7 @@ timezone: Pacific/Auckland
 
 title: Digital Garden # the main title
 
-tagline: YouTube Demo # it will display as the sub-title
+tagline: SRE / DevOps <br> Community Volunteer <br> Part-time Content Creator <br>  <h2> 🇼🇸 🇳🇿 🇨🇰 </h2> # it will display as the sub-title
 
 description: >- # used by seo meta and the atom feed
   A minimal, responsive and feature-rich Jekyll theme for technical writing.
@@ -35,14 +35,10 @@ social:
   # Change to your full name.
   # It will be displayed as the default author of the posts and the copyright owner in the Footer
   name: Gerald Tuimaleali'ifano
-  email: example@domain.com # change to your email address
+  #email: example@domain.com # change to your email address
   links:
-    # The first element serves as the copyright owner's link
-    #- https://twitter.com/username # change to your twitter homepage
-    - https://github.com/geraldtui # change to your github homepage
-    # Uncomment below to add more social links
-    # - https://www.facebook.com/username
-    # - https://www.linkedin.com/in/username
+    - https://www.linkedin.com/in/geraldtui/
+    - https://github.com/geraldtui 
 
 google_site_verification: # fill in to your verification string
 
