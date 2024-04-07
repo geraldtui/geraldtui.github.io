@@ -2,7 +2,7 @@
 layout: post
 title: Create a Digital Garden using Jekyll for FREE!
 date: 2024-04-03 00:00 +13
-categories: [website-creation]
+categories: [Tutorials]
 tags: [jekyll, chirpy, github]
 ---
 
@@ -11,13 +11,13 @@ Digital Gardens are fantastic tools for documenting your knowledge and expanding
 Learn how to effortlessly create and share your own Digital Garden for free using Jekyll, the Chirpy Theme, and Github Pages.
 
 ---
-## **Install Jekyll** 
+## **Install Jekyll**
 
 *Use [Jekyll Installation Guide](https://jekyllrb.com/docs/installation/) to install Jekyll and its dependencies
 
 
 ## **You will need these to customize and deploy Jekyll**
--  [GitHub Account](https://github.com/) 
+-  [GitHub Account](https://github.com/)
 -  [Git](https://github.com/git-guides/install-git)
 -  [VSCode](https://code.visualstudio.com/download) - or your preferred code editor
 
@@ -27,17 +27,17 @@ Learn how to effortlessly create and share your own Digital Garden for free usin
 
 ### Step 1: Clone the [chirpy-starter](https://github.com/new?template_name=chirpy-starter&template_owner=cotes2020) GitHub repo
 
-- Name your repository `<username>.github.io` (replace `username` with your github username). 
+- Name your repository `<username>.github.io` (replace `username` with your github username).
 - Select `Public` > `Create Repository`
 
 ![alt text](/assets/images/2024-04-03-create-a-digital-garden/image.png)
 _Cloning Chirpy GitHub Repo_
 
 
-### Step 2: Your website is up and running! 🎉 
+### Step 2: Your website is up and running! 🎉
 By the time you finish reading this line, your website would've already been published to GitHub pages and available on `https://<username>.github.io`
 
-What are you waiting for? Go ahead and check it out 🙂 
+What are you waiting for? Go ahead and check it out 🙂
 
 To check your site deployment status, go to the `Code` section of your GitHub repository. Find the deployment status at the bottom right of the page and click for more details.
 
@@ -49,7 +49,7 @@ _Check Deployment Status_
 ---
 ## **Time to Customize**
 
-### Step 1: Clone the repo to your local machine 
+### Step 1: Clone the repo to your local machine
 
 ```console
 git clone git@<YOUR-USER-NAME>/<YOUR-REPO-NAME>.git
@@ -57,7 +57,7 @@ git clone git@<YOUR-USER-NAME>/<YOUR-REPO-NAME>.git
 
 ### Step 2: Install Chirpy Dependencies
 ```console
-cd <repo name> 
+cd <repo name>
 bundle
 ```
 
@@ -80,12 +80,12 @@ _'_config.yaml' file_
 
 ```console
 bundle exec jekyll s
-``` 
+```
 
 This should start the site on http://127.0.0.1:4000
 
 ![alt text](/assets/images/2024-04-03-create-a-digital-garden/screenshot-202403232158.png)
-_Site after updating _config.yaml 
+_Site after updating _config.yaml
 
 ---
 ## Create Your First Post
@@ -118,30 +118,30 @@ categories: [category]
 tags: [tag1, tag2]
 ```
 
-### Step 3: Add Markdown Text 
+### Step 3: Add Markdown Text
 ```markdown
 # Like, Comment, Subscribe
-If you find value in this how-to doc. [Subscribe](https://www.youtube.com/@geraldtui8445?sub_confirmation=1) to my YouTube channel for more tutorials just like this one. 👍 
+If you find value in this how-to doc. [Subscribe](https://www.youtube.com/@geraldtui8445?sub_confirmation=1) to my YouTube channel for more tutorials just like this one. 👍
 ```
 
-### Deploy to GitHub 
-Commit and push your changes to your github remote repo to automatically deploy your site. 
+### Deploy to GitHub
+Commit and push your changes to your github remote repo to automatically deploy your site.
 
-Checkout the official [Git Documentation](https://git-scm.com/doc) if you need. 
+Checkout the official [Git Documentation](https://git-scm.com/doc) if you need.
 
-## Markdown Help 
+## Markdown Help
 Check the [Markdown Cheat Sheet](https://www.markdownguide.org/cheat-sheet/)
 
 Checkout the official Chirpy docs for specific Chirpy syntax 👉 https://chirpy.cotes.page/posts/write-a-new-post/
 
 
-## Useful VSCode Extensions 
+## Useful VSCode Extensions
 
-1. jekyll-post 
+1. jekyll-post
     - For quickly creating posts using a template
 2. Markdown All In One
     - For markdown shortcuts
-3. Markdown 
-   - Automatically saves pasted images into a directory of your choice. I use `/asets/images` 
-   - In your VSCode Settings use this item in `Copy Files: Destination` 
+3. Markdown
+   - Automatically saves pasted images into a directory of your choice. I use `/asets/images`
+   - In your VSCode Settings use this item in `Copy Files: Destination`
     ![alt text](/assets/images/2024-04-03-create-a-digital-garden/screenshot-202403240149.png)
