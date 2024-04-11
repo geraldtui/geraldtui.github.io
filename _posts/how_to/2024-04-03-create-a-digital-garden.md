@@ -2,7 +2,7 @@
 layout: post
 title: Create a Digital Garden using Jekyll for FREE!
 date: 2024-04-03 00:00 +13
-categories: [Tutorials]
+categories: [How To, Jekyll]
 tags: [jekyll, chirpy, github]
 ---
 
