@@ -2,7 +2,7 @@
 layout: post
 title: Atomic Habits by James Clear
 date: 2024-04-03 00:00 +13
-categories: [Books, Self-Help]
+categories: [Bookshelf, Self-Help]
 tags: [book]
 book: true
 hidden: true

@@ -2,7 +2,7 @@
 layout: post
 title: The Martian by Andy Weird
 date: 2024-04-03 00:00 +13
-categories: [Books, Fiction]
+categories: [Bookshelf, Fiction]
 tags: [book]
 book: true
 hidden: true
