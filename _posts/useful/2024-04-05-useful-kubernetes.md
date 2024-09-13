@@ -3,7 +3,7 @@ layout: post
 title: Useful Kubernetes
 date: 2024-04-05 07:59
 category: [Useful]
-tags: [kubernetes, k8s]
+tags: [kubernetes, k8s, useful]
 ---
 
 Useful commands, shortcuts, configs and setups for Kubernetes

@@ -3,7 +3,7 @@ layout: post
 title: Useful VSCode
 date: 2024-04-08 00:00 +13
 categories: [Useful]
-tags: [vscode]
+tags: [vscode, useful]
 book: false
 ---
 

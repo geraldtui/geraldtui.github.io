@@ -3,7 +3,7 @@ layout: post
 title: Project Hail Mary by Andy Weird
 date: 2024-01-01 00:00 +13
 categories: [Bookshelf, Fiction]
-tags: [tag]
+tags: [book]
 book: true
 hidden: true
 image: ../assets/images/bookshelf/project_hail_mary.png
