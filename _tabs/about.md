@@ -5,11 +5,12 @@ order: 5
 ---
 
 
-# 👋🏽 Hi!  
+# Talofa! 👋🏽
 
-I'm Gerald Tuimaleali'ifano aka GT, an SRE, DevOps Engineer and aspiring content creator.
+I'm **Gerald Tuimaleali'ifano** (aka GT) - a Senior Platform & SRE at Workday, where I keep thousands of Kubernetes services running smoothly at scale.
 
-When I'm not building cool environments using tools like AWS, K8s, Helm, Terraform, Terragrunt, FluxCD, Jenkins, Python etc.. I volunteer for the [Pasifika Tech Education Charity (PTEC)](https://www.pasifikateched.net/).  
+## Let's Connect
 
-PTECs' goal is to share technical knowledge and experience from the tech industry with the Pasifika community. We believe that we can inspire the next generation of Pasifika technical leaders 💪🏽 🚀 
+Got questions about SRE, DevOps, cloud infrastructure, or breaking into tech? Hit me up on [LinkedIn](https://www.linkedin.com/in/geraldtui/) or [GitHub](https://github.com/geraldtui).
 
+🇼🇸 🇳🇿 🇨🇰
