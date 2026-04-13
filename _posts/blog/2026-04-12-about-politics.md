@@ -29,7 +29,7 @@ That's the paradox. It's difficult to truly care about what doesn't affect you. 
 
 Working with high school students at Pasifika Tech Education Charity (PTEC) where I volunteer has taught me something. Spreading awareness is nearly impossible when students aren't interested to begin with. It's an uphill battle all the way. We're talking about concrete, tangible skills. Coding, cybersecurity, cloud infrastructure. Hands-on skills that they can use. Even these skills we're offering, it's proven difficult to break through.
 
-Good luck trying to talk about politics. (To be fair, I haven't tried yet.)
+Good luck trying to talk about politics.
 
 It's an endless cycle. Us older (more experienced 🙂) folks telling younger folks to pay more attention. Young people nodding politely and going back to living their lives.
 
