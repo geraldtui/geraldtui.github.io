@@ -1,0 +1,405 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>SudoSkills — System Architecture</title>
+    <link rel="preconnect" href="https://fonts.googleapis.com">
+    <link href="https://fonts.googleapis.com/css2?family=Inter:wght@300;400;500;600;700&family=JetBrains+Mono:wght@400;500&display=swap" rel="stylesheet">
+    <style>
+        :root {
+            --bg-primary: #09090b;
+            --bg-card: rgba(39, 39, 42, 0.85);
+            --text-primary: #f4f4f5;
+            --text-secondary: #71717a;
+            --accent: #2563eb;
+            --accent-2: #3b82f6;
+            --glow-warm: rgba(37, 99, 235, 0.12);
+            --glow-cool: rgba(37, 99, 235, 0.06);
+
+            --font-display: 'Inter', sans-serif;
+            --font-body: 'Inter', sans-serif;
+            --font-mono: 'JetBrains Mono', monospace;
+
+            --small-size: clamp(0.7rem, 1vw, 0.9rem);
+            --content-gap: clamp(0.75rem, 2vw, 1.5rem);
+            --ease-out-expo: cubic-bezier(0.16, 1, 0.3, 1);
+
+            --node-fill: rgba(22, 22, 28, 0.92);
+
+            --c-user:   #94a3b8;
+            --c-ui:     #3b82f6;
+            --c-state:  #a78bfa;
+            --c-parser: #22d3ee;
+            --c-exec:   #34d399;
+            --c-fs:     #fbbf24;
+            --c-valid:  #f472b6;
+            --c-data:   #818cf8;
+            --c-store:  #cbd5e1;
+        }
+
+        *, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+        html { overflow: hidden; }
+
+        body {
+            font-family: var(--font-body);
+            background: var(--bg-primary);
+            color: var(--text-primary);
+            overflow: hidden;
+        }
+
+        /* fills the iframe so there is no seam at the edges */
+        .stage {
+            position: relative;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            min-height: 100vh;
+            padding: clamp(0.5rem, 2vw, 1.25rem);
+            gap: var(--content-gap);
+            background:
+                radial-gradient(ellipse 60% 70% at 15% 5%, var(--glow-warm) 0%, transparent 55%),
+                radial-gradient(ellipse 55% 65% at 90% 100%, var(--glow-cool) 0%, transparent 55%),
+                var(--bg-primary);
+            overflow: hidden;
+        }
+
+        .stage-content {
+            position: relative;
+            z-index: 2;
+            width: 100%;
+            max-width: 1180px;
+            display: flex;
+            flex-direction: column;
+            align-items: center;
+            gap: var(--content-gap);
+        }
+
+        .grid-overlay::before {
+            content: '';
+            position: absolute;
+            inset: 0;
+            background-image:
+                linear-gradient(rgba(37, 99, 235, 0.04) 1px, transparent 1px),
+                linear-gradient(90deg, rgba(37, 99, 235, 0.04) 1px, transparent 1px);
+            background-size: 80px 80px;
+            mask-image: radial-gradient(ellipse 70% 60% at 50% 45%, black 10%, transparent 100%);
+            z-index: 0;
+            pointer-events: none;
+        }
+
+        .reveal {
+            opacity: 0;
+            transform: translateY(18px);
+            animation: reveal-in 0.9s var(--ease-out-expo) forwards;
+        }
+        .reveal:nth-child(1) { animation-delay: 0.05s; }
+        .reveal:nth-child(2) { animation-delay: 0.2s; }
+        @keyframes reveal-in { to { opacity: 1; transform: translateY(0); } }
+
+        .diagram-wrap { width: 100%; display: flex; justify-content: center; }
+        .diagram-wrap svg { width: 100%; max-width: 1100px; height: auto; }
+
+        .node rect { transition: stroke 0.3s, filter 0.3s; }
+        .node:hover rect { stroke-width: 2; filter: drop-shadow(0 0 12px rgba(244, 244, 245, 0.25)); }
+
+        .node-title { font-family: var(--font-display); font-weight: 700; fill: var(--accent-2); }
+        .node-sub { font-family: var(--font-body); fill: var(--text-secondary); }
+        .group-label { font-family: var(--font-mono); fill: var(--text-secondary); letter-spacing: 0.12em; text-transform: uppercase; }
+        .edge-label { font-family: var(--font-mono); fill: #8b8b9e; }
+
+        .legend {
+            display: flex;
+            flex-wrap: wrap;
+            gap: clamp(0.6rem, 2vw, 1.5rem);
+            justify-content: center;
+            font-size: var(--small-size);
+            color: var(--text-secondary);
+            font-family: var(--font-body);
+        }
+        .legend-item { display: flex; align-items: center; gap: 0.5em; }
+        .legend-swatch {
+            width: 14px; height: 14px; border-radius: 4px;
+            border: 1.5px solid;
+            background: color-mix(in srgb, var(--sw) 14%, transparent);
+            border-color: var(--sw);
+        }
+        .sw-user{--sw:var(--c-user)} .sw-ui{--sw:var(--c-ui)} .sw-state{--sw:var(--c-state)}
+        .sw-parser{--sw:var(--c-parser)} .sw-exec{--sw:var(--c-exec)} .sw-fs{--sw:var(--c-fs)}
+        .sw-valid{--sw:var(--c-valid)} .sw-data{--sw:var(--c-data)}
+
+        @media (max-width: 640px) { .legend { gap: 0.5rem 1rem; } }
+
+        /* Fullscreen toggle button */
+        .fs-btn {
+            position: absolute;
+            top: 10px;
+            right: 10px;
+            z-index: 5;
+            display: inline-flex;
+            align-items: center;
+            gap: 0.4em;
+            font-family: var(--font-mono);
+            font-size: 0.72rem;
+            color: var(--text-secondary);
+            background: rgba(39, 39, 42, 0.7);
+            border: 1px solid rgba(63, 63, 70, 0.8);
+            border-radius: 8px;
+            padding: 0.4em 0.7em;
+            cursor: pointer;
+            backdrop-filter: blur(6px);
+            transition: color 0.2s, border-color 0.2s, background 0.2s;
+        }
+        .fs-btn:hover {
+            color: var(--text-primary);
+            border-color: rgba(37, 99, 235, 0.5);
+            background: rgba(37, 99, 235, 0.12);
+        }
+        .fs-btn svg { width: 14px; height: 14px; display: block; }
+        .fs-btn .fs-exit { display: none; }
+
+        /* when the stage is the fullscreen element, fill the screen and center */
+        .stage:fullscreen {
+            justify-content: center;
+            min-height: 100vh;
+            border-radius: 0;
+            border: 0;
+            padding: clamp(1rem, 4vw, 3rem);
+        }
+        .stage:fullscreen .stage-content { max-width: 1400px; }
+        .stage:fullscreen .fs-btn .fs-enter { display: none; }
+        .stage:fullscreen .fs-btn .fs-exit { display: block; }
+        .stage:-webkit-full-screen {
+            justify-content: center;
+            min-height: 100vh;
+            border-radius: 0;
+            border: 0;
+        }
+
+        @media (prefers-reduced-motion: reduce) {
+            *, *::before, *::after {
+                animation-duration: 0.01ms !important;
+                animation-iteration-count: 1 !important;
+            }
+            .reveal { opacity: 1; transform: none; }
+        }
+    </style>
+</head>
+<body>
+
+<main class="stage grid-overlay" id="stage">
+    <button class="fs-btn" id="fsBtn" type="button" aria-label="Toggle fullscreen" title="Toggle fullscreen">
+        <svg class="fs-enter" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3H5a2 2 0 0 0-2 2v3M21 8V5a2 2 0 0 0-2-2h-3M16 21h3a2 2 0 0 0 2-2v-3M3 16v3a2 2 0 0 0 2 2h3"/></svg>
+        <svg class="fs-exit" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true"><path d="M8 3v3a2 2 0 0 1-2 2H3M21 8h-3a2 2 0 0 1-2-2V3M16 21v-3a2 2 0 0 1 2-2h3M3 16h3a2 2 0 0 1 2 2v3"/></svg>
+        <span class="fs-label">Fullscreen</span>
+    </button>
+    <div class="stage-content">
+
+        <div class="reveal diagram-wrap">
+            <svg viewBox="0 0 1080 560" fill="none" xmlns="http://www.w3.org/2000/svg" role="img" aria-label="SudoSkills architecture diagram">
+                <defs>
+                    <marker id="arrow-user" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="var(--c-user)"/></marker>
+                    <marker id="arrow-ui" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="var(--c-ui)"/></marker>
+                    <marker id="arrow-state" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="var(--c-state)"/></marker>
+                    <marker id="arrow-parser" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="var(--c-parser)"/></marker>
+                    <marker id="arrow-exec" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="var(--c-exec)"/></marker>
+                    <marker id="arrow-fs" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="var(--c-fs)"/></marker>
+                    <marker id="arrow-valid" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="var(--c-valid)"/></marker>
+                    <marker id="arrow-data" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="var(--c-data)"/></marker>
+                    <marker id="arrow-store" markerWidth="9" markerHeight="9" refX="6.5" refY="3" orient="auto" markerUnits="userSpaceOnUse"><path d="M0,0 L7,3 L0,6 Z" fill="var(--c-store)"/></marker>
+                </defs>
+
+                <!-- GROUP CONTAINERS -->
+                <rect x="30" y="60" width="430" height="440" rx="16" fill="rgba(59,130,246,0.04)" stroke="rgba(59,130,246,0.28)" stroke-width="1" stroke-dasharray="5 5"/>
+                <text x="50" y="48" class="group-label" font-size="11" fill="var(--c-ui)">Browser · Next.js (SSG)</text>
+
+                <rect x="620" y="60" width="430" height="320" rx="16" fill="rgba(52,211,153,0.04)" stroke="rgba(52,211,153,0.28)" stroke-width="1" stroke-dasharray="5 5"/>
+                <text x="640" y="48" class="group-label" font-size="11" fill="var(--c-exec)">Simulation Engine · In-Memory</text>
+
+                <!-- NODES -->
+                <g class="node">
+                    <rect x="70" y="90" width="160" height="76" rx="12" fill="var(--node-fill)" stroke="var(--c-user)" stroke-width="1.5"/>
+                    <text x="156" y="124" text-anchor="middle" class="node-title" font-size="14" fill="var(--c-user)">User</text>
+                    <text x="156" y="145" text-anchor="middle" class="node-sub" font-size="11">types a command</text>
+                </g>
+
+                <g class="node">
+                    <rect x="260" y="90" width="170" height="76" rx="12" fill="var(--node-fill)" stroke="var(--c-ui)" stroke-width="1.5"/>
+                    <text x="348" y="120" text-anchor="middle" class="node-title" font-size="14" fill="var(--c-ui)">UI Components</text>
+                    <text x="348" y="139" text-anchor="middle" class="node-sub" font-size="10.5">Terminal · Step · Footer</text>
+                    <text x="348" y="153" text-anchor="middle" class="node-sub" font-size="10.5">Progress · Modal</text>
+                </g>
+
+                <g class="node">
+                    <rect x="150" y="230" width="220" height="80" rx="12" fill="var(--node-fill)" stroke="var(--c-state)" stroke-width="1.5"/>
+                    <text x="263" y="262" text-anchor="middle" class="node-title" font-size="14" fill="var(--c-state)">React Context</text>
+                    <text x="263" y="281" text-anchor="middle" class="node-sub" font-size="10.5">InteractiveTerminalContext</text>
+                    <text x="263" y="295" text-anchor="middle" class="node-sub" font-size="10.5">step · success · history · fs</text>
+                </g>
+
+                <g class="node">
+                    <rect x="70" y="378" width="160" height="86" rx="12" fill="var(--node-fill)" stroke="var(--c-data)" stroke-width="1.5"/>
+                    <text x="156" y="408" text-anchor="middle" class="node-title" font-size="13" fill="var(--c-data)">Lesson Data</text>
+                    <text x="156" y="427" text-anchor="middle" class="node-sub" font-size="10.5">data/lessons/*.ts</text>
+                    <text x="156" y="441" text-anchor="middle" class="node-sub" font-size="10.5">bundled at build (SSG)</text>
+                </g>
+
+                <g class="node">
+                    <rect x="290" y="378" width="150" height="86" rx="12" fill="var(--node-fill)" stroke="var(--c-store)" stroke-width="1.5"/>
+                    <text x="371" y="408" text-anchor="middle" class="node-title" font-size="13" fill="var(--c-store)">localStorage</text>
+                    <text x="371" y="427" text-anchor="middle" class="node-sub" font-size="10.5">progress</text>
+                    <text x="371" y="441" text-anchor="middle" class="node-sub" font-size="10.5">lesson.{key}</text>
+                </g>
+
+                <g class="node">
+                    <rect x="650" y="92" width="170" height="74" rx="12" fill="var(--node-fill)" stroke="var(--c-parser)" stroke-width="1.5"/>
+                    <text x="738" y="124" text-anchor="middle" class="node-title" font-size="14" fill="var(--c-parser)">Command Parser</text>
+                    <text x="738" y="143" text-anchor="middle" class="node-sub" font-size="10.5">tokens · flags · pipes</text>
+                </g>
+
+                <g class="node">
+                    <rect x="850" y="92" width="170" height="74" rx="12" fill="var(--node-fill)" stroke="var(--c-exec)" stroke-width="1.5"/>
+                    <text x="938" y="118" text-anchor="middle" class="node-title" font-size="14" fill="var(--c-exec)">Executor</text>
+                    <text x="938" y="137" text-anchor="middle" class="node-sub" font-size="10.5">command registry</text>
+                    <text x="938" y="151" text-anchor="middle" class="node-sub" font-size="10.5">ls · cd · grep · find …</text>
+                </g>
+
+                <g class="node">
+                    <rect x="850" y="248" width="170" height="80" rx="12" fill="var(--node-fill)" stroke="var(--c-fs)" stroke-width="1.5"/>
+                    <text x="938" y="280" text-anchor="middle" class="node-title" font-size="14" fill="var(--c-fs)">Virtual Filesystem</text>
+                    <text x="938" y="299" text-anchor="middle" class="node-sub" font-size="10.5">in-memory file tree</text>
+                    <text x="938" y="313" text-anchor="middle" class="node-sub" font-size="10.5">path resolution · CRUD</text>
+                </g>
+
+                <g class="node">
+                    <rect x="650" y="248" width="170" height="80" rx="12" fill="var(--node-fill)" stroke="var(--c-valid)" stroke-width="1.5"/>
+                    <text x="738" y="280" text-anchor="middle" class="node-title" font-size="14" fill="var(--c-valid)">Validator</text>
+                    <text x="738" y="299" text-anchor="middle" class="node-sub" font-size="10.5">checkCommand()</text>
+                    <text x="738" y="313" text-anchor="middle" class="node-sub" font-size="10.5">expected vs result</text>
+                </g>
+
+                <!-- EDGES -->
+                <path id="e1" d="M230,128 L260,128" stroke="var(--c-user)" stroke-opacity="0.55" stroke-width="1.4" marker-end="url(#arrow-user)"/>
+                <text x="245" y="118" text-anchor="middle" class="edge-label" font-size="9" fill="var(--c-user)">input</text>
+
+                <path id="e2" d="M320,166 C300,200 285,205 270,230" stroke="var(--c-ui)" stroke-opacity="0.55" stroke-width="1.4" marker-end="url(#arrow-ui)"/>
+                <text x="318" y="200" text-anchor="middle" class="edge-label" font-size="9" fill="var(--c-ui)">dispatch</text>
+
+                <path id="e3" d="M370,258 C520,250 560,150 650,128" stroke="var(--c-state)" stroke-opacity="0.55" stroke-width="1.4" marker-end="url(#arrow-state)"/>
+                <text x="525" y="180" text-anchor="middle" class="edge-label" font-size="9" fill="var(--c-state)">execute(cmd)</text>
+
+                <path id="e4" d="M820,129 L850,129" stroke="var(--c-parser)" stroke-opacity="0.6" stroke-width="1.4" marker-end="url(#arrow-parser)"/>
+
+                <path id="e5" d="M935,166 L935,248" stroke="var(--c-exec)" stroke-opacity="0.6" stroke-width="1.4" marker-end="url(#arrow-exec)"/>
+                <text x="970" y="210" text-anchor="middle" class="edge-label" font-size="9" fill="var(--c-exec)">read/write</text>
+
+                <path id="e6" d="M850,288 L820,288" stroke="var(--c-fs)" stroke-opacity="0.6" stroke-width="1.4" marker-end="url(#arrow-fs)"/>
+                <text x="835" y="278" text-anchor="middle" class="edge-label" font-size="9" fill="var(--c-fs)">state</text>
+
+                <path id="e7" d="M650,300 C500,330 420,300 370,290" stroke="var(--c-valid)" stroke-opacity="0.55" stroke-width="1.4" marker-end="url(#arrow-valid)"/>
+                <text x="510" y="332" text-anchor="middle" class="edge-label" font-size="9" fill="var(--c-valid)">{ success, output }</text>
+
+                <path id="e8" d="M300,230 C310,205 330,200 345,166" stroke="var(--c-state)" stroke-opacity="0.55" stroke-width="1.4" marker-end="url(#arrow-state)"/>
+                <text x="372" y="205" text-anchor="middle" class="edge-label" font-size="9" fill="var(--c-state)">render</text>
+
+                <path id="e9" d="M180,378 C200,350 215,340 235,310" stroke="var(--c-data)" stroke-opacity="0.55" stroke-width="1.4" marker-end="url(#arrow-data)"/>
+                <text x="155" y="350" text-anchor="middle" class="edge-label" font-size="9" fill="var(--c-data)">steps</text>
+
+                <path id="e10" d="M300,310 C320,340 340,345 358,378" stroke="var(--c-store)" stroke-opacity="0.55" stroke-width="1.4" marker-end="url(#arrow-store)"/>
+                <text x="385" y="350" text-anchor="middle" class="edge-label" font-size="9">save/load</text>
+
+                <!-- FLOWING DATA DOTS -->
+                <circle r="3.4" fill="var(--c-user)">
+                    <animateMotion dur="6s" begin="0s" repeatCount="indefinite" keyPoints="0;1" keyTimes="0;1" calcMode="spline" keySplines="0.45 0 0.55 1"><mpath href="#e1"/></animateMotion>
+                    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="6s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="3.4" fill="var(--c-ui)">
+                    <animateMotion dur="6s" begin="0.8s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1"><mpath href="#e2"/></animateMotion>
+                    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="6s" begin="0.8s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="3.4" fill="var(--c-state)">
+                    <animateMotion dur="7s" begin="1.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1"><mpath href="#e3"/></animateMotion>
+                    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.92;1" dur="7s" begin="1.6s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="3.4" fill="var(--c-parser)">
+                    <animateMotion dur="6s" begin="3s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1"><mpath href="#e4"/></animateMotion>
+                    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="6s" begin="3s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="3.4" fill="var(--c-exec)">
+                    <animateMotion dur="6s" begin="3.6s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1"><mpath href="#e5"/></animateMotion>
+                    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="6s" begin="3.6s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="3.4" fill="var(--c-fs)">
+                    <animateMotion dur="6s" begin="4.3s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1"><mpath href="#e6"/></animateMotion>
+                    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="6s" begin="4.3s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="3.4" fill="var(--c-valid)">
+                    <animateMotion dur="7s" begin="5s" repeatCount="indefinite" calcMode="spline" keySplines="0.42 0 0.58 1"><mpath href="#e7"/></animateMotion>
+                    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.08;0.92;1" dur="7s" begin="5s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="3.4" fill="var(--c-state)">
+                    <animateMotion dur="6s" begin="6.5s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1"><mpath href="#e8"/></animateMotion>
+                    <animate attributeName="opacity" values="0;1;1;0" keyTimes="0;0.1;0.9;1" dur="6s" begin="6.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="3.4" fill="var(--c-data)">
+                    <animateMotion dur="8s" begin="0.5s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1"><mpath href="#e9"/></animateMotion>
+                    <animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.1;0.9;1" dur="8s" begin="0.5s" repeatCount="indefinite"/>
+                </circle>
+                <circle r="3.4" fill="var(--c-store)">
+                    <animateMotion dur="8s" begin="2.5s" repeatCount="indefinite" calcMode="spline" keySplines="0.45 0 0.55 1"><mpath href="#e10"/></animateMotion>
+                    <animate attributeName="opacity" values="0;0.9;0.9;0" keyTimes="0;0.1;0.9;1" dur="8s" begin="2.5s" repeatCount="indefinite"/>
+                </circle>
+            </svg>
+        </div>
+
+        <div class="reveal legend">
+            <div class="legend-item"><span class="legend-swatch sw-user"></span> User</div>
+            <div class="legend-item"><span class="legend-swatch sw-ui"></span> UI Components</div>
+            <div class="legend-item"><span class="legend-swatch sw-state"></span> React Context</div>
+            <div class="legend-item"><span class="legend-swatch sw-parser"></span> Parser</div>
+            <div class="legend-item"><span class="legend-swatch sw-exec"></span> Executor</div>
+            <div class="legend-item"><span class="legend-swatch sw-fs"></span> Virtual FS</div>
+            <div class="legend-item"><span class="legend-swatch sw-valid"></span> Validator</div>
+            <div class="legend-item"><span class="legend-swatch sw-data"></span> Data / Storage</div>
+        </div>
+
+    </div>
+</main>
+
+<script>
+    (function () {
+        var stage = document.getElementById('stage');
+        var btn = document.getElementById('fsBtn');
+        var label = btn.querySelector('.fs-label');
+
+        function isFs() {
+            return document.fullscreenElement || document.webkitFullscreenElement;
+        }
+
+        function enter() {
+            if (stage.requestFullscreen) return stage.requestFullscreen();
+            if (stage.webkitRequestFullscreen) return stage.webkitRequestFullscreen();
+        }
+        function exit() {
+            if (document.exitFullscreen) return document.exitFullscreen();
+            if (document.webkitExitFullscreen) return document.webkitExitFullscreen();
+        }
+
+        btn.addEventListener('click', function () {
+            try {
+                isFs() ? exit() : enter();
+            } catch (e) { /* fullscreen may be blocked; ignore */ }
+        });
+
+        function sync() {
+            label.textContent = isFs() ? 'Exit' : 'Fullscreen';
+        }
+        document.addEventListener('fullscreenchange', sync);
+        document.addEventListener('webkitfullscreenchange', sync);
+    })();
+</script>
+
+</body>
+</html>
