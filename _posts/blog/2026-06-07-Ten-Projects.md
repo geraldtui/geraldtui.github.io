@@ -11,9 +11,13 @@ I'm shipping ten of those ideas. The good, the bad, and the ugly.
 
 Here are the rules.
 
-1. Everything is an MVP (static sites or free tier tools)
+~~1. Everything is an MVP (static sites or free tier tools)~~
+1. Every project has to teach me something real as an engineer (backends, infra, systems etc.)
+2. Cost effective to run, self-hosted or free tier.
 2. Build in public and share my learnings.
 3. At least 1 project per week
+
+(Edit: Updated Rule #1. I can ship 10 MVPs on a Sunday afternoon. Where's the fun in that?)
 
 Why do this?
 
